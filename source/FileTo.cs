@@ -42,6 +42,7 @@ namespace Kyameru.Component.File
             this.Log(LogLevel.Information, string.Format(Resources.INFO_ACTION_WRITE, item.Headers["SourceFile"]));
             try
             {
+                this.EnsureDestinationExists();
                 System.IO.File.WriteAllBytes(this.GetDestination(item.Headers["SourceFile"]), (byte[])item.Body);
                 this.DeleteFile(item);
             }
@@ -57,6 +58,7 @@ namespace Kyameru.Component.File
             this.Log(LogLevel.Information, string.Format(Resources.INFO_ACTION_MOVE, item.Headers["SourceFile"]));
             try
             {
+                this.EnsureDestinationExists();
                 System.IO.File.Move(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]));
             }
             catch (Exception ex)
@@ -66,11 +68,20 @@ namespace Kyameru.Component.File
             }
         }
 
+        private void EnsureDestinationExists()
+        {
+            if (!System.IO.Directory.Exists(this.headers["Target"]))
+            {
+                System.IO.Directory.CreateDirectory(this.headers["Target"]);
+            }
+        }
+
         private void CopyFile(Routable item)
         {
             this.Log(LogLevel.Information, string.Format(Resources.INFO_ACTION_COPY, item.Headers["SourceFile"]));
             try
             {
+                this.EnsureDestinationExists();
                 System.IO.File.Copy(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]));
             }
             catch (Exception ex)

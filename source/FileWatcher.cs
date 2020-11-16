@@ -35,7 +35,8 @@ namespace Kyameru.Component.File
 
             this.SetupSubDirectories();
             this.fsw.EnableRaisingEvents = true;
-            //this.fsw.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
+            this.fsw.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
+           | NotifyFilters.FileName | NotifyFilters.DirectoryName;
             foreach (string item in this.config["Notifications"].Split(','))
             {
                 if (this.fswSetup.ContainsKey(item))

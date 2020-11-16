@@ -17,28 +17,7 @@ namespace Kyameru.Component.File.Tests
 
         public FileWatcherTests()
         {
-            this.location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        }
-
-        [Test]
-        public void RenameWorks()
-        {
-            this.CheckFile("rename.tdd");
-            this.CheckFile("renamed.tdd");
-            AutoResetEvent resetEvent = new AutoResetEvent(false);
-            string method = string.Empty;
-            System.IO.File.WriteAllText($"{this.location}/rename.tdd", "test data");
-            FileWatcher from = this.Setup("Renamed");
-            from.OnAction += delegate (object sender, Routable e)
-            {
-                method = e.Headers["Method"];
-                resetEvent.Set();
-            };
-            from.Setup();
-            from.Start();
-            System.IO.File.Move($"{this.location}/rename.tdd", $"{this.location}/renamed.tdd");
-            bool wasAssigned = resetEvent.WaitOne(TimeSpan.FromSeconds(5));
-            Assert.AreEqual("Renamed", method);
+            this.location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/test";
         }
 
         [Test]
@@ -61,6 +40,27 @@ namespace Kyameru.Component.File.Tests
             Assert.AreEqual("Created", method);
         }
 
+        [Test]
+        public void ChangedWorks()
+        {
+            this.CheckFile("created.tdd");
+            AutoResetEvent resetEvent = new AutoResetEvent(false);
+            System.IO.File.WriteAllText($"{this.location}/Created.tdd", "test data");
+            string method = string.Empty;
+
+            FileWatcher from = this.Setup("Changed");
+            from.OnAction += delegate (object sender, Routable e)
+            {
+                method = e.Headers["Method"];
+                resetEvent.Set();
+            };
+            from.Setup();
+            from.Start();
+            System.IO.File.WriteAllText($"{this.location}/Created.tdd", "more data added");
+            bool wasAssigned = resetEvent.WaitOne(TimeSpan.FromSeconds(5));
+            Assert.AreEqual("Changed", method);
+        }
+
         private void From_OnAction(object sender, Core.Entities.Routable e)
         {
             this.message = e;
@@ -70,9 +70,9 @@ namespace Kyameru.Component.File.Tests
         {
             Dictionary<string, string> headers = new Dictionary<string, string>()
             {
-                { "Target", this.location },
+                { "Target", "test/" },
                 { "Notifications", notification },
-                { "Filter", "*.*" },
+                { "Filter", "*.tdd" },
                 { "SubDirectories", "true" }
             };
 
@@ -81,6 +81,11 @@ namespace Kyameru.Component.File.Tests
 
         private void CheckFile(string file)
         {
+            if (!Directory.Exists("test"))
+            {
+                Directory.CreateDirectory("test");
+            }
+
             if (System.IO.File.Exists($"{location}/{file}"))
             {
                 System.IO.File.Delete($"{location}/{file}");
