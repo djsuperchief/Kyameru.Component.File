@@ -1,5 +1,8 @@
 ﻿namespace Kyameru.Component.File
 {
+    /// <summary>
+    /// String resources class.
+    /// </summary>
     internal static class Resources
     {
         internal const string ERROR_EXPECTEDSINGLE = "Expected single file input.";

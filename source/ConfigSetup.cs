@@ -2,11 +2,26 @@
 
 namespace Kyameru.Component.File
 {
+    /// <summary>
+    /// Configuration extensions
+    /// </summary>
     internal static class ConfigSetup
     {
+        /// <summary>
+        /// Valid from headers.
+        /// </summary>
         private static string[] fromHeaders = new string[] { "Target", "Notifications", "Filter", "SubDirectories" };
+
+        /// <summary>
+        /// Valid to headers
+        /// </summary>
         private static string[] toHeaders = new string[] { "Target", "Action", "Overwrite" };
 
+        /// <summary>
+        /// Converts incoming headers to valid processing headers.
+        /// </summary>
+        /// <param name="incoming">Incoming dictionary.</param>
+        /// <returns>Returns a dictionary of valid headers.</returns>
         public static Dictionary<string, string> ToFromConfig(this Dictionary<string, string> incoming)
         {
             Dictionary<string, string> response = new Dictionary<string, string>();
@@ -26,6 +41,11 @@ namespace Kyameru.Component.File
             return response;
         }
 
+        /// <summary>
+        /// Converts incoming headers to valid processing headers.
+        /// </summary>
+        /// <param name="incoming">Incoming dictionary.</param>
+        /// <returns>Returns a dictionary of valid headers.</returns>
         public static Dictionary<string, string> ToToConfig(this Dictionary<string, string> incoming)
         {
             Dictionary<string, string> response = new Dictionary<string, string>();

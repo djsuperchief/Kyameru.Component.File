@@ -6,24 +6,48 @@ using Microsoft.Extensions.Logging;
 
 namespace Kyameru.Component.File
 {
+    /// <summary>
+    /// To Component.
+    /// </summary>
     public class FileTo : Core.Contracts.IToComponent
     {
+        /// <summary>
+        /// Valid actions
+        /// </summary>
         private readonly Dictionary<string, Action<Routable>> toActions = new Dictionary<string, Action<Routable>>();
+
+        /// <summary>
+        /// Valid headers
+        /// </summary>
         private readonly Dictionary<string, string> headers;
 
-        public event EventHandler<Log> OnLog;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileTo"/> class.
+        /// </summary>
+        /// <param name="incomingHeaders">Incoming headers.</param>
         public FileTo(Dictionary<string, string> incomingHeaders)
         {
             this.SetupInternalActions();
             this.headers = incomingHeaders.ToToConfig();
         }
 
+        /// <summary>
+        /// Log event.
+        /// </summary>
+        public event EventHandler<Log> OnLog;
+
+        /// <summary>
+        /// Process the message.
+        /// </summary>
+        /// <param name="item">Message to process.</param>
         public void Process(Routable item)
         {
             this.toActions[this.headers["Action"]](item);
         }
 
+        /// <summary>
+        /// Sets up internal delegates.
+        /// </summary>
         private void SetupInternalActions()
         {
             this.toActions.Add("Move", this.MoveFile);
@@ -32,11 +56,21 @@ namespace Kyameru.Component.File
             this.toActions.Add("Write", this.WriteFile);
         }
 
+        /// <summary>
+        /// Abstraction for logging event.
+        /// </summary>
+        /// <param name="logLevel">Log level to raise.</param>
+        /// <param name="message">Log message.</param>
+        /// <param name="exception">Log exception.</param>
         private void Log(LogLevel logLevel, string message, Exception exception = null)
         {
             this.OnLog?.Invoke(this, new Core.Entities.Log(logLevel, message, exception));
         }
 
+        /// <summary>
+        /// Writes a file to disk.
+        /// </summary>
+        /// <param name="item">Message to process.</param>
         private void WriteFile(Routable item)
         {
             this.Log(LogLevel.Information, string.Format(Resources.INFO_ACTION_WRITE, item.Headers["SourceFile"]));
@@ -53,6 +87,10 @@ namespace Kyameru.Component.File
             }
         }
 
+        /// <summary>
+        /// Moves a file.
+        /// </summary>
+        /// <param name="item">Message to process.</param>
         private void MoveFile(Routable item)
         {
             this.Log(LogLevel.Information, string.Format(Resources.INFO_ACTION_MOVE, item.Headers["SourceFile"]));
@@ -68,6 +106,9 @@ namespace Kyameru.Component.File
             }
         }
 
+        /// <summary>
+        /// Ensures destination folder exists.
+        /// </summary>
         private void EnsureDestinationExists()
         {
             if (!System.IO.Directory.Exists(this.headers["Target"]))
@@ -76,6 +117,10 @@ namespace Kyameru.Component.File
             }
         }
 
+        /// <summary>
+        /// Copies the source file but leaves original in place.
+        /// </summary>
+        /// <param name="item">Message to process.</param>
         private void CopyFile(Routable item)
         {
             this.Log(LogLevel.Information, string.Format(Resources.INFO_ACTION_COPY, item.Headers["SourceFile"]));
@@ -91,6 +136,10 @@ namespace Kyameru.Component.File
             }
         }
 
+        /// <summary>
+        /// Deletes source file.
+        /// </summary>
+        /// <param name="item">Message to process.</param>
         private void DeleteFile(Routable item)
         {
             this.Log(LogLevel.Information, string.Format(Resources.INFO_ACTION_DELETE, item.Headers["SourceFile"]));
@@ -105,11 +154,22 @@ namespace Kyameru.Component.File
             }
         }
 
+        /// <summary>
+        /// Constructs the destination.
+        /// </summary>
+        /// <param name="filename">Source file.</param>
+        /// <returns>Returns a valid destination for the file.</returns>
         private string GetDestination(string filename)
         {
             return Path.Combine(this.headers["Target"], filename);
         }
 
+        /// <summary>
+        /// Raises an error object.
+        /// </summary>
+        /// <param name="action">Current action.</param>
+        /// <param name="message">Error message.</param>
+        /// <returns>Returns a new instance of the <see cref="Error"/> object.</returns>
         private Error RaiseError(string action, string message)
         {
             return new Error("ToFile", action, message);

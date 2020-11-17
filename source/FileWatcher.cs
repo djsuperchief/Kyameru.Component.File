@@ -7,28 +7,57 @@ using Microsoft.Extensions.Logging;
 
 namespace Kyameru.Component.File
 {
+    /// <summary>
+    /// From component.
+    /// </summary>
     public class FileWatcher : Kyameru.Core.Contracts.IFromComponent
     {
-        public event EventHandler<Routable> OnAction;
-
-        public event EventHandler<Log> OnLog;
-
-        private FileSystemWatcher fsw;
-
+        /// <summary>
+        /// List of delegates to perform actions.
+        /// </summary>
         private readonly Dictionary<string, Action> fswSetup = new Dictionary<string, Action>();
+
+        /// <summary>
+        /// Valid headers.
+        /// </summary>
         private readonly Dictionary<string, string> config;
 
+        /// <summary>
+        /// File system watcher.
+        /// </summary>
+        private FileSystemWatcher fsw;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileWatcher"/> class.
+        /// </summary>
+        /// <param name="headers">Incoming Headers.</param>
         public FileWatcher(Dictionary<string, string> headers)
         {
             this.config = headers.ToFromConfig();
             this.SetupInternalActions();
         }
 
+        /// <summary>
+        /// Event raised when file picked up.
+        /// </summary>
+        public event EventHandler<Routable> OnAction;
+
+        /// <summary>
+        /// Event raised when needing to log.
+        /// </summary>
+        public event EventHandler<Log> OnLog;
+
+        /// <summary>
+        /// Sets up the component.
+        /// </summary>
         public void Setup()
         {
             this.VerifyArguments();
         }
 
+        /// <summary>
+        /// Starts the component.
+        /// </summary>
         public void Start()
         {
             this.fsw = this.SetupFsw();
@@ -46,11 +75,26 @@ namespace Kyameru.Component.File
             }
         }
 
+        /// <summary>
+        /// Stops the component.
+        /// </summary>
+        public void Stop()
+        {
+            this.fsw.Dispose();
+        }
+
+        /// <summary>
+        /// Sets up the file watcher.
+        /// </summary>
+        /// <returns>Returns a new <see cref="FileSystemWatcher"/>.</returns>
         private FileSystemWatcher SetupFsw()
         {
             return new FileSystemWatcher(this.config["Target"], this.config["Filter"]);
         }
 
+        /// <summary>
+        /// Sets up sub directories.
+        /// </summary>
         private void SetupSubDirectories()
         {
             if (this.config.Keys.Count == 4)
@@ -59,16 +103,20 @@ namespace Kyameru.Component.File
             }
         }
 
-        public void Stop()
-        {
-            this.fsw.Dispose();
-        }
-
+        /// <summary>
+        /// Abstraction for logging event.
+        /// </summary>
+        /// <param name="logLevel">Log level to raise.</param>
+        /// <param name="message">Log message.</param>
+        /// <param name="exception">Log exception.</param>
         private void Log(LogLevel logLevel, string message, Exception exception = null)
         {
             this.OnLog?.Invoke(this, new Core.Entities.Log(logLevel, message, exception));
         }
 
+        /// <summary>
+        /// Verifies the setup.
+        /// </summary>
         private void VerifyArguments()
         {
             if (string.IsNullOrWhiteSpace(this.config["Target"]))
@@ -84,6 +132,9 @@ namespace Kyameru.Component.File
             }
         }
 
+        /// <summary>
+        /// Sets up internal delegates.
+        /// </summary>
         private void SetupInternalActions()
         {
             this.fswSetup.Add("Created", this.AddCreated);
@@ -91,36 +142,65 @@ namespace Kyameru.Component.File
             this.fswSetup.Add("Renamed", this.AddRenamed);
         }
 
+        /// <summary>
+        /// Add renamed event.
+        /// </summary>
         private void AddRenamed()
         {
-            this.fsw.Renamed += Fsw_Renamed;
+            this.fsw.Renamed += this.Fsw_Renamed;
         }
 
+        /// <summary>
+        /// Raised when file is renamed.
+        /// </summary>
+        /// <param name="sender">Class sending event.</param>
+        /// <param name="e">Event arguments.</param>
         private void Fsw_Renamed(object sender, RenamedEventArgs e)
         {
             this.CreateMessage("Rename", e.FullPath);
         }
 
+        /// <summary>
+        /// Adds changed event.
+        /// </summary>
         private void AddChanged()
         {
-            this.fsw.Changed += Fsw_Changed;
+            this.fsw.Changed += this.Fsw_Changed;
         }
 
+        /// <summary>
+        /// Raised when file is changed.
+        /// </summary>
+        /// <param name="sender">Class sending event.</param>
+        /// <param name="e">Event arguments.</param>
         private void Fsw_Changed(object sender, FileSystemEventArgs e)
         {
             this.CreateMessage("Changed", e.FullPath);
         }
 
+        /// <summary>
+        /// Adds created event.
+        /// </summary>
         private void AddCreated()
         {
-            this.fsw.Created += Fsw_Created;
+            this.fsw.Created += this.Fsw_Created;
         }
 
+        /// <summary>
+        /// Raised when file is created.
+        /// </summary>
+        /// <param name="sender">Class sending event.</param>
+        /// <param name="e">Event arguments.</param>
         private void Fsw_Created(object sender, FileSystemEventArgs e)
         {
             this.CreateMessage("Created", e.FullPath);
         }
 
+        /// <summary>
+        /// Creates a message to start the process.
+        /// </summary>
+        /// <param name="method">Method used to raise event.</param>
+        /// <param name="sourceFile">Source file found.</param>
         private void CreateMessage(string method, string sourceFile)
         {
             FileInfo info = new FileInfo(sourceFile);
