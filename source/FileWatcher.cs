@@ -209,7 +209,7 @@ namespace Kyameru.Component.File
             headers.Add("SourceDirectory", System.IO.Path.GetDirectoryName(sourceFile));
             headers.Add("SourceFile", System.IO.Path.GetFileName(sourceFile));
             headers.Add("FullSource", sourceFile);
-            headers.Add("DateCreated", info.CreationTimeUtc.ToLongTimeString());
+            headers.Add("DateCreated", info.CreationTimeUtc.ToLongDateString());
             headers.Add("Readonly", info.IsReadOnly.ToString());
             headers.Add("Method", method);
             headers.Add("DataType", "byte");
