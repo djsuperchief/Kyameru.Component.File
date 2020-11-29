@@ -17,7 +17,8 @@ jobs:
         dotnet-version: 3.1.301
 
     - run: |
-        vers="${git describe --tags}}"
+        echo "::set-env name=VERSION::$(git describe --tags)"
+        echo $VERSION
         echo $vers
         echo ${GITHUB_REF##*/}
         ref="${GITHUB_REF##*/}"
