@@ -17,9 +17,7 @@ jobs:
         dotnet-version: 3.1.301
 
     - run: |
-        echo $VERSION
-        echo $(git describe --tags)
-        echo $vers
+        echo $(git describe --tags --dirty)
         echo ${GITHUB_REF##*/}
         ref="${GITHUB_REF##*/}"
         ref="${ref/comp-file-/}"
