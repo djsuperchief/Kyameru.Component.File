@@ -17,7 +17,7 @@ jobs:
         dotnet-version: 3.1.301
 
     - run: |
-        vers="0.0.{github.run_number}-beta"
+        vers="0.0.${github.run_number}-beta"
         echo $vers
         echo ${GITHUB_REF##*/}
         ref="${GITHUB_REF##*/}"
