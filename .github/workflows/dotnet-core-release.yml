@@ -19,6 +19,7 @@ jobs:
     - run: |
         echo "::set-env name=VERSION::$(git describe --tags)"
         echo $VERSION
+        echo $(git describe --tags)
         echo $vers
         echo ${GITHUB_REF##*/}
         ref="${GITHUB_REF##*/}"
