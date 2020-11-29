@@ -18,10 +18,6 @@ jobs:
 
     - run: |
         echo $(git describe --tags --dirty)
-        echo ${GITHUB_REF##*/}
-        ref="${GITHUB_REF##*/}"
-        ref="${ref/comp-file-/}"
-        echo $ref
     - name: Install dependencies
       run: dotnet restore build/Kyameru.sln
     - name: Build
