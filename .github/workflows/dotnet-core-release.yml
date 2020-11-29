@@ -3,7 +3,7 @@ name: Publish Package
 on:
   push:
     tags: 
-      - v/comp-file/*'
+      - v/comp-file/*
 
 jobs:
   build:
