@@ -27,7 +27,7 @@ namespace Kyameru.Component.File.Tests
             AutoResetEvent resetEvent = new AutoResetEvent(false);
             string method = string.Empty;
 
-            FileWatcher from = this.Setup("Created");
+            FileWatcher from = this.Setup("Created,Changed");
             from.OnAction += delegate (object sender, Routable e)
             {
                 method = e.Headers["Method"];
@@ -37,7 +37,7 @@ namespace Kyameru.Component.File.Tests
             from.Start();
             System.IO.File.WriteAllText($"{this.location}/Created.tdd", "test data");
             bool wasAssigned = resetEvent.WaitOne(TimeSpan.FromSeconds(5));
-            Assert.AreEqual("Created", method);
+            Assert.IsTrue(!string.IsNullOrWhiteSpace(method));
         }
 
         [Test]
