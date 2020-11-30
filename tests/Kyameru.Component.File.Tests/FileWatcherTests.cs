@@ -27,6 +27,7 @@ namespace Kyameru.Component.File.Tests
             AutoResetEvent resetEvent = new AutoResetEvent(false);
             string method = string.Empty;
 
+            // Github tests for some reason do not raise created compared to local os.
             FileWatcher from = this.Setup("Created,Changed");
             from.OnAction += delegate (object sender, Routable e)
             {

@@ -1,5 +1,6 @@
 # Kyameru.Component.File
 ![Build](https://github.com/djsuperchief/Kyameru.Component.File/workflows/Build/badge.svg)
+![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Kyameru.Component.File)
 
 Kyameru File Component works with Kyameru.Core and provides both a From and To route.
 
