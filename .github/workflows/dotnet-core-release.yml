@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: dotnet build build/Kyameru.Component.File.sln --configuration Release --no-restore
     - name: Test
-      run: dotnet test tests/KyameruComponent.File.Tests/KyameruComponent.File.Tests.csproj --no-restore --verbosity normal
+      run: dotnet test tests/Kyameru.Component.File.Tests/Kyameru.Component.File.Tests.csproj --no-restore --verbosity normal
     - name: Pack
       run: dotnet pack source/Kyameru.Component.File.csproj -c Release -p:PackageVersion=$VERSION
     - name: Push
