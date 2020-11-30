@@ -81,9 +81,9 @@ namespace Kyameru.Component.File.Tests
 
         private void CheckFile(string file)
         {
-            if (!Directory.Exists("test"))
+            if (!Directory.Exists(this.location))
             {
-                Directory.CreateDirectory("test");
+                Directory.CreateDirectory(this.location);
             }
 
             if (System.IO.File.Exists($"{location}/{file}"))
