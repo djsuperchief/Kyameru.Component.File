@@ -1,4 +1,6 @@
 # Kyameru.Component.File
+![Build](https://github.com/djsuperchief/Kyameru.Component.File/workflows/Build/badge.svg)
+
 Kyameru File Component works with Kyameru.Core and provides both a From and To route.
 
 The File component can watch a directory for files and raise a message through a route to indicate it has found a new file. It can also move files from one place to another either by writing the contents of the Routable message OR from disk.
