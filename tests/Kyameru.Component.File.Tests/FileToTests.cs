@@ -51,7 +51,12 @@ namespace Kyameru.Component.File.Tests
 
         private FileTo Setup(string action, string randomFileName)
         {
-            System.IO.File.WriteAllText($"test/{randomFileName}", "test file");
+            if (!Directory.Exists(fileLocation))
+            {
+                Directory.CreateDirectory(fileLocation);
+            }
+
+            System.IO.File.WriteAllText($"{fileLocation}/{randomFileName}", "test file");
             Dictionary<string, string> headers = new Dictionary<string, string>()
             {
                 { "Target", $"{this.fileLocation}/target" },
