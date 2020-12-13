@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Kyameru.Component.File.Utilities;
 using Kyameru.Core.Entities;
 using Microsoft.Extensions.Logging;
 
@@ -22,13 +23,22 @@ namespace Kyameru.Component.File
         private readonly Dictionary<string, string> headers;
 
         /// <summary>
+        /// File utilities.
+        /// </summary>
+        /// <remarks>
+        /// To allow testing of all code paths.
+        /// </remarks>
+        private readonly IFileUtils fileUtils;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="FileTo"/> class.
         /// </summary>
         /// <param name="incomingHeaders">Incoming headers.</param>
-        public FileTo(Dictionary<string, string> incomingHeaders)
+        public FileTo(Dictionary<string, string> incomingHeaders, IFileUtils fileUtils)
         {
             this.SetupInternalActions();
             this.headers = incomingHeaders.ToToConfig();
+            this.fileUtils = fileUtils;
         }
 
         /// <summary>
@@ -77,7 +87,7 @@ namespace Kyameru.Component.File
             try
             {
                 this.EnsureDestinationExists();
-                System.IO.File.WriteAllBytes(this.GetDestination(item.Headers["SourceFile"]), (byte[])item.Body);
+                this.fileUtils.WriteAllBytes(this.GetDestination(item.Headers["SourceFile"]), (byte[])item.Body);
                 this.DeleteFile(item);
             }
             catch (Exception ex)
@@ -97,7 +107,7 @@ namespace Kyameru.Component.File
             try
             {
                 this.EnsureDestinationExists();
-                System.IO.File.Move(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]));
+                this.fileUtils.Move(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]));
             }
             catch (Exception ex)
             {
@@ -113,7 +123,7 @@ namespace Kyameru.Component.File
         {
             if (!System.IO.Directory.Exists(this.headers["Target"]))
             {
-                System.IO.Directory.CreateDirectory(this.headers["Target"]);
+                this.fileUtils.CreateDirectory(this.headers["Target"]);
             }
         }
 
@@ -127,7 +137,7 @@ namespace Kyameru.Component.File
             try
             {
                 this.EnsureDestinationExists();
-                System.IO.File.Copy(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]));
+                this.fileUtils.CopyFile(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]));
             }
             catch (Exception ex)
             {
@@ -145,7 +155,7 @@ namespace Kyameru.Component.File
             this.Log(LogLevel.Information, string.Format(Resources.INFO_ACTION_DELETE, item.Headers["SourceFile"]));
             try
             {
-                System.IO.File.Delete(item.Headers["FullSource"]);
+                this.fileUtils.Delete(item.Headers["FullSource"]);
             }
             catch (Exception ex)
             {
