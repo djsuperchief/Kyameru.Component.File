@@ -1,4 +1,5 @@
 ﻿using Kyameru.Core.Entities;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Kyameru.Component.File.Tests
     public class FileWatcherTests
     {
         private readonly string location;
+        private readonly Mock<Component.File.Utilities.IFileSystemWatcher> fileSystemWatcher = new Mock<Utilities.IFileSystemWatcher>();
         private Routable message;
 
         public FileWatcherTests()
@@ -28,7 +30,7 @@ namespace Kyameru.Component.File.Tests
             string method = string.Empty;
 
             // Github tests for some reason do not raise created compared to local os.
-            FileWatcher from = this.Setup("Created,Changed");
+            FileWatcher from = this.Setup("Created");
             from.OnAction += delegate (object sender, Routable e)
             {
                 method = e.Headers["Method"];
@@ -37,16 +39,19 @@ namespace Kyameru.Component.File.Tests
             from.Setup();
             from.Start();
             System.IO.File.WriteAllText($"{this.location}/Created.tdd", "test data");
+            this.fileSystemWatcher.Raise(x => x.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.location, "Created.tdd"));
             bool wasAssigned = resetEvent.WaitOne(TimeSpan.FromSeconds(5));
+            from.Stop();
             Assert.IsTrue(!string.IsNullOrWhiteSpace(method));
         }
 
         [Test]
         public void ChangedWorks()
         {
-            this.CheckFile("created.tdd");
+            string filename = $"{Guid.NewGuid().ToString("N")}.txt";
+            this.CheckFile(filename);
             AutoResetEvent resetEvent = new AutoResetEvent(false);
-            System.IO.File.WriteAllText($"{this.location}/Created.tdd", "test data");
+            System.IO.File.WriteAllText($"{this.location}/{filename}", "test data");
             string method = string.Empty;
 
             FileWatcher from = this.Setup("Changed");
@@ -57,14 +62,11 @@ namespace Kyameru.Component.File.Tests
             };
             from.Setup();
             from.Start();
-            System.IO.File.WriteAllText($"{this.location}/Created.tdd", "more data added");
+            System.IO.File.WriteAllText($"{this.location}/{filename}", "more data added");
+            System.IO.File.WriteAllText($"{this.location}/{filename}", "more data added");
+            this.fileSystemWatcher.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, this.location, filename));
             bool wasAssigned = resetEvent.WaitOne(TimeSpan.FromSeconds(5));
             Assert.AreEqual("Changed", method);
-        }
-
-        private void From_OnAction(object sender, Core.Entities.Routable e)
-        {
-            this.message = e;
         }
 
         public File.FileWatcher Setup(string notification)
@@ -73,11 +75,10 @@ namespace Kyameru.Component.File.Tests
             {
                 { "Target", "test/" },
                 { "Notifications", notification },
-                { "Filter", "*.tdd" },
                 { "SubDirectories", "true" }
             };
 
-            return new FileWatcher(headers);
+            return new FileWatcher(headers, this.fileSystemWatcher.Object);
         }
 
         private void CheckFile(string file)

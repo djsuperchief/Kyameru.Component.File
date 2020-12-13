@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Kyameru.Component.File.Utilities;
 using Kyameru.Core.Entities;
 
 using Microsoft.Extensions.Logging;
@@ -25,16 +26,17 @@ namespace Kyameru.Component.File
         /// <summary>
         /// File system watcher.
         /// </summary>
-        private FileSystemWatcher fsw;
+        private IFileSystemWatcher fsw;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileWatcher"/> class.
         /// </summary>
         /// <param name="headers">Incoming Headers.</param>
-        public FileWatcher(Dictionary<string, string> headers)
+        public FileWatcher(Dictionary<string, string> headers, IFileSystemWatcher fileSystemWatcher)
         {
             this.config = headers.ToFromConfig();
             this.SetupInternalActions();
+            this.fsw = fileSystemWatcher;
         }
 
         /// <summary>
@@ -60,7 +62,7 @@ namespace Kyameru.Component.File
         /// </summary>
         public void Start()
         {
-            this.fsw = this.SetupFsw();
+            this.SetupFsw();
 
             this.SetupSubDirectories();
             this.fsw.EnableRaisingEvents = true;
@@ -87,9 +89,10 @@ namespace Kyameru.Component.File
         /// Sets up the file watcher.
         /// </summary>
         /// <returns>Returns a new <see cref="FileSystemWatcher"/>.</returns>
-        private FileSystemWatcher SetupFsw()
+        private void SetupFsw()
         {
-            return new FileSystemWatcher(this.config["Target"], this.config["Filter"]);
+            this.fsw.Path = this.config["Target"];
+            this.fsw.Filter = this.config["Filter"];
         }
 
         /// <summary>

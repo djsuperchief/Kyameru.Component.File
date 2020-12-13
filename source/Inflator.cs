@@ -15,7 +15,7 @@ namespace Kyameru.Component.File
         /// <returns>Returns a new instance of a <see cref="IFromComponent"/> class.</returns>
         public IFromComponent CreateFromComponent(Dictionary<string, string> headers)
         {
-            return new FileWatcher(headers);
+            return new FileWatcher(headers, new Utilities.BaseFileSystemWatcher());
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Kyameru.Component.File
         /// <returns>Returns a new instance of a <see cref="IToComponent"/> class.</returns>
         public IToComponent CreateToComponent(Dictionary<string, string> headers)
         {
-            return new FileTo(headers);
+            return new FileTo(headers, new Utilities.FileUtils());
         }
     }
 }
