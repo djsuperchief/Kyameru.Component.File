@@ -38,15 +38,16 @@ namespace Kyameru.Component.File.Tests
             from.Start();
             System.IO.File.WriteAllText($"{this.location}/Created.tdd", "test data");
             bool wasAssigned = resetEvent.WaitOne(TimeSpan.FromSeconds(5));
+            from.Stop();
             Assert.IsTrue(!string.IsNullOrWhiteSpace(method));
         }
 
         [Test]
         public void ChangedWorks()
         {
-            this.CheckFile("created.tdd");
+            this.CheckFile("changed.tdd");
             AutoResetEvent resetEvent = new AutoResetEvent(false);
-            System.IO.File.WriteAllText($"{this.location}/Created.tdd", "test data");
+            System.IO.File.WriteAllText($"{this.location}/changed.tdd", "test data");
             string method = string.Empty;
 
             FileWatcher from = this.Setup("Changed");
@@ -57,7 +58,7 @@ namespace Kyameru.Component.File.Tests
             };
             from.Setup();
             from.Start();
-            System.IO.File.WriteAllText($"{this.location}/Created.tdd", "more data added");
+            System.IO.File.WriteAllText($"{this.location}/changed.tdd", "more data added");
             bool wasAssigned = resetEvent.WaitOne(TimeSpan.FromSeconds(5));
             Assert.AreEqual("Changed", method);
         }
