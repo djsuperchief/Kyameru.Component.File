@@ -73,7 +73,6 @@ namespace Kyameru.Component.File.Tests
             {
                 { "Target", "test/" },
                 { "Notifications", notification },
-                { "Filter", "*.tdd" },
                 { "SubDirectories", "true" }
             };
 
