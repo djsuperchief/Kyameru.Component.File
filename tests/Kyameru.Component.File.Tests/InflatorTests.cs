@@ -35,5 +35,12 @@ namespace Kyameru.Component.File.Tests
             Inflator inflator = new Inflator();
             Assert.NotNull(inflator.CreateToComponent(headers));
         }
+
+        [Test]
+        public void AtomicThrows()
+        {
+            Inflator inflator = new Inflator();
+            Assert.Throws<NotImplementedException>(() => inflator.CreateAtomicComponent(null));
+        }
     }
 }
