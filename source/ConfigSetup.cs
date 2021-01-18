@@ -10,7 +10,7 @@ namespace Kyameru.Component.File
         /// <summary>
         /// Valid from headers.
         /// </summary>
-        private static string[] fromHeaders = new string[] { "Target", "Notifications", "Filter", "SubDirectories" };
+        private static string[] fromHeaders = new string[] { "Target", "Notifications", "Filter", "SubDirectories", "InitialScan" };
 
         /// <summary>
         /// Valid to headers
@@ -36,6 +36,11 @@ namespace Kyameru.Component.File
             if (!response.ContainsKey("Filter"))
             {
                 response.Add("Filter", "*.*");
+            }
+
+            if (!response.ContainsKey("InitialScan"))
+            {
+                response.Add("InitialScan", "false");
             }
 
             return response;
