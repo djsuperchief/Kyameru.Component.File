@@ -1,5 +1,7 @@
 # Kyameru.Component.File
 ![Build](https://github.com/djsuperchief/Kyameru.Component.File/workflows/Build/badge.svg)
+![CodeQL](https://github.com/djsuperchief/Kyameru.Component.File/workflows/CodeQL/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/djsuperchief/Kyameru.Component.File/badge.svg?branch=main)](https://coveralls.io/github/djsuperchief/Kyameru.Component.File?branch=main)
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Kyameru.Component.File)
 
 Kyameru File Component works with Kyameru.Core and provides both a From and To route.

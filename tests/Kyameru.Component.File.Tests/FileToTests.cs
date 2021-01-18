@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Kyameru.Component.File.Utilities;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -63,7 +64,9 @@ namespace Kyameru.Component.File.Tests
                 { "Action", action }
             };
 
-            return new FileTo(headers);
+            return (FileTo)new Inflator().CreateToComponent(headers);
+
+            //return new FileTo(headers, new Component.File.Utilities.FileUtils());
         }
     }
 }
