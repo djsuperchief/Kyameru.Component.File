@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Kyameru.Component.File.Utilities;
 using Kyameru.Core.Entities;
 
@@ -24,6 +25,11 @@ namespace Kyameru.Component.File
         private readonly Dictionary<string, string> config;
 
         /// <summary>
+        /// Value indicating whether an initial scan will occur of the directory.
+        /// </summary>
+        private bool willScan = false;
+
+        /// <summary>
         /// File system watcher.
         /// </summary>
         private IFileSystemWatcher fsw;
@@ -37,6 +43,7 @@ namespace Kyameru.Component.File
             this.config = headers.ToFromConfig();
             this.SetupInternalActions();
             this.fsw = fileSystemWatcher;
+            this.DetermineScan(this.config["InitialScan"]);
         }
 
         /// <summary>
@@ -63,7 +70,7 @@ namespace Kyameru.Component.File
         public void Start()
         {
             this.SetupFsw();
-
+            this.ScanFiles();
             this.SetupSubDirectories();
             this.fsw.EnableRaisingEvents = true;
             this.fsw.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
@@ -218,6 +225,38 @@ namespace Kyameru.Component.File
             headers.Add("DataType", "byte");
             Routable dataItem = new Routable(headers, System.IO.File.ReadAllBytes(sourceFile));
             this.OnAction?.Invoke(this, dataItem);
+        }
+
+        /// <summary>
+        /// Determine if we should scan the directory.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        private void DetermineScan(string header)
+        {
+            if (bool.TryParse(header, out this.willScan))
+            {
+                this.Log(LogLevel.Debug, "Scanning directory Enabled");
+            }
+        }
+
+        private void ScanFiles()
+        {
+            this.Log(LogLevel.Debug, "Scanning directories");
+            SearchOption searchOption = SearchOption.AllDirectories;
+            if (bool.Parse(this.config["SubDirectories"]))
+            {
+                searchOption = SearchOption.TopDirectoryOnly;
+            }
+            string[] files = Directory.GetFiles(this.config["Target"], this.config["Filter"], searchOption);
+            if (files.Any())
+            {
+                for (int i = 0; i < files.Count(); i++)
+                {
+                    this.Log(LogLevel.Information, $"Checking file {files[i]}");
+                    this.CreateMessage("Scanned", files[i]);
+                }
+            }
         }
     }
 }

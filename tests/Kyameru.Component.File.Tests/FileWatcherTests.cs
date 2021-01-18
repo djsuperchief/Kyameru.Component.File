@@ -69,13 +69,47 @@ namespace Kyameru.Component.File.Tests
             Assert.AreEqual("Changed", method);
         }
 
-        public File.FileWatcher Setup(string notification)
+        [Test]
+        public void ScannerWorks()
+        {
+            string contents = "test data";
+            string scanDir = this.location + "scan";
+            int count = 0;
+            AutoResetEvent resetEvent = new AutoResetEvent(false);
+
+            if (System.IO.Directory.Exists(scanDir))
+            {
+                Directory.Delete(scanDir, true);
+            }
+            Directory.CreateDirectory(scanDir);
+
+            for (int i = 0; i < 20; i++)
+            {
+                System.IO.File.WriteAllText($"{scanDir}/testfile{i}.txt", contents);
+            }
+
+            FileWatcher from = this.Setup("Changed", true, scanDir);
+            from.OnAction += delegate (object sender, Routable e)
+            {
+                if (e.Headers["Method"] == "Scanned")
+                {
+                    count++;
+                }
+            };
+            from.Setup();
+            from.Start();
+            resetEvent.WaitOne(TimeSpan.FromSeconds(5));
+            Assert.AreEqual(20, count);
+        }
+
+        public File.FileWatcher Setup(string notification, bool initialScan = false, string target = "test/")
         {
             Dictionary<string, string> headers = new Dictionary<string, string>()
             {
-                { "Target", "test/" },
+                { "Target",target },
                 { "Notifications", notification },
-                { "SubDirectories", "true" }
+                { "SubDirectories", "true" },
+                { "InitialScan", initialScan.ToString() }
             };
 
             return new FileWatcher(headers, this.fileSystemWatcher.Object);
