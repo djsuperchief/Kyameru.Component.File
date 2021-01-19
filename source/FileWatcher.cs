@@ -25,6 +25,16 @@ namespace Kyameru.Component.File
         private readonly Dictionary<string, string> config;
 
         /// <summary>
+        /// List of directories to ignore.
+        /// </summary>
+        private readonly string[] directoriesToIgnore;
+
+        /// <summary>
+        /// List of strings that should be ignored as part of the file name and extension.
+        /// </summary>
+        private readonly string[] stringsToIgnore;
+
+        /// <summary>
         /// Value indicating whether an initial scan will occur of the directory.
         /// </summary>
         private bool willScan = false;
@@ -44,6 +54,8 @@ namespace Kyameru.Component.File
             this.SetupInternalActions();
             this.fsw = fileSystemWatcher;
             this.DetermineScan(this.config["InitialScan"]);
+            this.directoriesToIgnore = this.config["Ignore"].SplitPiped();
+            this.stringsToIgnore = this.config["IgnoreStrings"].SplitPiped();
         }
 
         /// <summary>
@@ -213,18 +225,21 @@ namespace Kyameru.Component.File
         /// <param name="sourceFile">Source file found.</param>
         private void CreateMessage(string method, string sourceFile)
         {
-            FileInfo info = new FileInfo(sourceFile);
-            sourceFile = sourceFile.Replace("\\", "/");
-            Dictionary<string, string> headers = new Dictionary<string, string>();
-            headers.Add("SourceDirectory", System.IO.Path.GetDirectoryName(sourceFile));
-            headers.Add("SourceFile", System.IO.Path.GetFileName(sourceFile));
-            headers.Add("FullSource", sourceFile);
-            headers.Add("DateCreated", info.CreationTimeUtc.ToLongDateString());
-            headers.Add("Readonly", info.IsReadOnly.ToString());
-            headers.Add("Method", method);
-            headers.Add("DataType", "byte");
-            Routable dataItem = new Routable(headers, System.IO.File.ReadAllBytes(sourceFile));
-            this.OnAction?.Invoke(this, dataItem);
+            if (this.IsProcessable(sourceFile))
+            {
+                FileInfo info = new FileInfo(sourceFile);
+                sourceFile = sourceFile.Replace("\\", "/");
+                Dictionary<string, string> headers = new Dictionary<string, string>();
+                headers.Add("SourceDirectory", System.IO.Path.GetDirectoryName(sourceFile));
+                headers.Add("SourceFile", System.IO.Path.GetFileName(sourceFile));
+                headers.Add("FullSource", sourceFile);
+                headers.Add("DateCreated", info.CreationTimeUtc.ToLongDateString());
+                headers.Add("Readonly", info.IsReadOnly.ToString());
+                headers.Add("Method", method);
+                headers.Add("DataType", "byte");
+                Routable dataItem = new Routable(headers, System.IO.File.ReadAllBytes(sourceFile));
+                this.OnAction?.Invoke(this, dataItem);
+            }
         }
 
         /// <summary>
@@ -257,6 +272,24 @@ namespace Kyameru.Component.File
                     this.CreateMessage("Scanned", files[i]);
                 }
             }
+        }
+
+        private bool IsProcessable(string file)
+        {
+            string toCheck = file.ToLower();
+            bool response = true;
+            if (this.ContainsIgnoreDirectories(file) || this.stringsToIgnore.Any(x => toCheck.Contains(x)))
+            {
+                response = false;
+            }
+
+            return response;
+        }
+
+        private bool ContainsIgnoreDirectories(string file)
+        {
+            string[] folders = file.ToLower().Split(Path.DirectorySeparatorChar);
+            return folders.Select(x => x).Intersect(this.directoriesToIgnore).Any();
         }
     }
 }

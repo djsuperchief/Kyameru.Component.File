@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using Kyameru.Component.File.Utilities;
 
 namespace Kyameru.Component.File.Tests
 {
@@ -102,14 +103,58 @@ namespace Kyameru.Component.File.Tests
             Assert.AreEqual(20, count);
         }
 
-        public File.FileWatcher Setup(string notification, bool initialScan = false, string target = "test/")
+        [Test]
+        [TestCase("in|inner", "")]
+        [TestCase("", ".stuff|stuffing")]
+        public void IgnoreWorks(string directories, string strings)
+        {
+            string contents = "test data";
+            string scanDir = "in";
+            string fileName = "myfile.txt";
+            if (!string.IsNullOrWhiteSpace(strings))
+            {
+                fileName = $"{fileName}{strings.SplitPiped()[0]}";
+            }
+
+            int count = 0;
+            AutoResetEvent resetEvent = new AutoResetEvent(false);
+
+            if (System.IO.Directory.Exists(scanDir))
+            {
+                Directory.Delete(scanDir, true);
+            }
+            Directory.CreateDirectory(scanDir);
+            System.IO.File.WriteAllText(Path.Combine(scanDir, fileName), contents);
+
+            FileWatcher from = this.Setup("Changed", true, scanDir, directories, strings);
+            from.OnAction += delegate (object sender, Routable e)
+            {
+                if (e.Headers["Method"] == "Scanned")
+                {
+                    count++;
+                }
+            };
+            from.Setup();
+            from.Start();
+            resetEvent.WaitOne(TimeSpan.FromSeconds(5));
+            Assert.AreEqual(0, count);
+        }
+
+        public File.FileWatcher Setup(
+            string notification,
+            bool initialScan = false,
+            string target = "test/",
+            string ignore = "",
+            string ignoreStrings = "")
         {
             Dictionary<string, string> headers = new Dictionary<string, string>()
             {
                 { "Target",target },
                 { "Notifications", notification },
                 { "SubDirectories", "true" },
-                { "InitialScan", initialScan.ToString() }
+                { "InitialScan", initialScan.ToString() },
+                { "Ignore", ignore },
+                { "IgnoreStrings", ignoreStrings }
             };
 
             return new FileWatcher(headers, this.fileSystemWatcher.Object);
