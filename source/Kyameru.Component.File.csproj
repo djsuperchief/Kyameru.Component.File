@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kyameru.Core" Version="0.0.10-beta" />
+    <PackageReference Include="Kyameru.Core" Version="0.0.11-beta" />
   </ItemGroup>
 
   <ItemGroup>
