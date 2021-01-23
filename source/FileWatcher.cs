@@ -225,20 +225,27 @@ namespace Kyameru.Component.File
         /// <param name="sourceFile">Source file found.</param>
         private void CreateMessage(string method, string sourceFile)
         {
-            if (this.IsProcessable(sourceFile))
+            try
             {
-                FileInfo info = new FileInfo(sourceFile);
-                sourceFile = sourceFile.Replace("\\", "/");
-                Dictionary<string, string> headers = new Dictionary<string, string>();
-                headers.Add("&SourceDirectory", System.IO.Path.GetDirectoryName(sourceFile));
-                headers.Add("SourceFile", System.IO.Path.GetFileName(sourceFile));
-                headers.Add("&FullSource", sourceFile);
-                headers.Add("&DateCreated", info.CreationTimeUtc.ToLongDateString());
-                headers.Add("Readonly", info.IsReadOnly.ToString());
-                headers.Add("Method", method);
-                headers.Add("DataType", "byte");
-                Routable dataItem = new Routable(headers, System.IO.File.ReadAllBytes(sourceFile));
-                this.OnAction?.Invoke(this, dataItem);
+                if (this.IsProcessable(sourceFile))
+                {
+                    FileInfo info = new FileInfo(sourceFile);
+                    sourceFile = sourceFile.Replace("\\", "/");
+                    Dictionary<string, string> headers = new Dictionary<string, string>();
+                    headers.Add("&SourceDirectory", System.IO.Path.GetDirectoryName(sourceFile));
+                    headers.Add("SourceFile", System.IO.Path.GetFileName(sourceFile));
+                    headers.Add("&FullSource", sourceFile);
+                    headers.Add("&DateCreated", info.CreationTimeUtc.ToLongDateString());
+                    headers.Add("Readonly", info.IsReadOnly.ToString());
+                    headers.Add("Method", method);
+                    headers.Add("DataType", "byte");
+                    Routable dataItem = new Routable(headers, System.IO.File.ReadAllBytes(sourceFile));
+                    this.OnAction?.Invoke(this, dataItem);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Kyameru.Core.Exceptions.ComponentException("Error creating message, see inner exception.", ex);
             }
         }
 
@@ -276,11 +283,16 @@ namespace Kyameru.Component.File
 
         private bool IsProcessable(string file)
         {
-            string toCheck = file.ToLower();
-            bool response = true;
-            if (this.ContainsIgnoreDirectories(file) || this.stringsToIgnore.Any(x => toCheck.Contains(x)))
+            bool response = false;
+            if (System.IO.File.Exists(file))
             {
-                response = false;
+                response = true;
+                string toCheck = file.ToLower();
+
+                if (this.ContainsIgnoreDirectories(file) || this.stringsToIgnore.Any(x => toCheck.Contains(x)))
+                {
+                    response = false;
+                }
             }
 
             return response;
