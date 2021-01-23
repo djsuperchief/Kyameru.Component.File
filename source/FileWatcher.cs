@@ -52,6 +52,7 @@ namespace Kyameru.Component.File
         {
             this.config = headers.ToFromConfig();
             this.SetupInternalActions();
+            this.Setup();
             this.fsw = fileSystemWatcher;
             this.DetermineScan(this.config["InitialScan"]);
             this.directoriesToIgnore = this.config["Ignore"].SplitPiped();
@@ -141,17 +142,22 @@ namespace Kyameru.Component.File
         /// </summary>
         private void VerifyArguments()
         {
-            if (string.IsNullOrWhiteSpace(this.config["Target"]))
+            if (this.IsConfigBlank("Target"))
             {
                 this.Log(LogLevel.Error, Resources.ERROR_TARGET_UNSPECIFIED);
                 throw new ArgumentException(Resources.ERROR_TARGET_UNSPECIFIED);
             }
 
-            if (this.config.Keys.Count < 3)
+            if (this.IsConfigBlank("Notifications"))
             {
-                this.Log(LogLevel.Error, Resources.ERROR_NOTENOUGHARGUMENTS_DIRECTORY);
-                throw new ArgumentException(Resources.ERROR_NOTENOUGHARGUMENTS_DIRECTORY);
+                this.Log(LogLevel.Error, Resources.ERROR_NOTIFICATIONS_UNSPECIFIED);
+                throw new ArgumentException(Resources.ERROR_NOTIFICATIONS_UNSPECIFIED);
             }
+        }
+
+        private bool IsConfigBlank(string key)
+        {
+            return !this.config.ContainsKey(key) || string.IsNullOrWhiteSpace(this.config[key]);
         }
 
         /// <summary>
