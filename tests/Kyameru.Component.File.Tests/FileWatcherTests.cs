@@ -83,10 +83,11 @@ namespace Kyameru.Component.File.Tests
                 Directory.Delete(scanDir, true);
             }
             Directory.CreateDirectory(scanDir);
+            Directory.CreateDirectory(Path.Combine(scanDir, "sub"));
 
             for (int i = 0; i < 20; i++)
             {
-                System.IO.File.WriteAllText($"{scanDir}/testfile{i}.txt", contents);
+                System.IO.File.WriteAllText($"{scanDir}/sub/testfile{i}.txt", contents);
             }
 
             FileWatcher from = this.Setup("Changed", true, scanDir);

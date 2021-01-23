@@ -119,7 +119,7 @@ namespace Kyameru.Component.File
         /// </summary>
         private void SetupSubDirectories()
         {
-            if (this.config.Keys.Count == 4)
+            if (this.config.ContainsKey("SubDirectories") && bool.Parse(this.config["SubDirectories"]))
             {
                 this.fsw.IncludeSubdirectories = bool.Parse(this.config["SubDirectories"]);
             }
@@ -230,10 +230,10 @@ namespace Kyameru.Component.File
                 FileInfo info = new FileInfo(sourceFile);
                 sourceFile = sourceFile.Replace("\\", "/");
                 Dictionary<string, string> headers = new Dictionary<string, string>();
-                headers.Add("SourceDirectory", System.IO.Path.GetDirectoryName(sourceFile));
+                headers.Add("&SourceDirectory", System.IO.Path.GetDirectoryName(sourceFile));
                 headers.Add("SourceFile", System.IO.Path.GetFileName(sourceFile));
-                headers.Add("FullSource", sourceFile);
-                headers.Add("DateCreated", info.CreationTimeUtc.ToLongDateString());
+                headers.Add("&FullSource", sourceFile);
+                headers.Add("&DateCreated", info.CreationTimeUtc.ToLongDateString());
                 headers.Add("Readonly", info.IsReadOnly.ToString());
                 headers.Add("Method", method);
                 headers.Add("DataType", "byte");
@@ -259,7 +259,7 @@ namespace Kyameru.Component.File
         {
             this.Log(LogLevel.Debug, "Scanning directories");
             SearchOption searchOption = SearchOption.AllDirectories;
-            if (bool.Parse(this.config["SubDirectories"]))
+            if (!bool.Parse(this.config["SubDirectories"]))
             {
                 searchOption = SearchOption.TopDirectoryOnly;
             }
