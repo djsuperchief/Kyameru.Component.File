@@ -71,7 +71,9 @@ namespace Kyameru.Component.File.Tests
         }
 
         [Test]
-        public void ScannerWorks()
+        [TestCase("true", 21)]
+        [TestCase("false", 1)]
+        public void ScannerWorks(string subDirectories, int expected)
         {
             string contents = "test data";
             string scanDir = this.location + "scan";
@@ -83,13 +85,16 @@ namespace Kyameru.Component.File.Tests
                 Directory.Delete(scanDir, true);
             }
             Directory.CreateDirectory(scanDir);
+            Directory.CreateDirectory(Path.Combine(scanDir, "sub"));
 
             for (int i = 0; i < 20; i++)
             {
-                System.IO.File.WriteAllText($"{scanDir}/testfile{i}.txt", contents);
+                System.IO.File.WriteAllText($"{scanDir}/sub/testfile{i}.txt", contents);
             }
 
-            FileWatcher from = this.Setup("Changed", true, scanDir);
+            System.IO.File.WriteAllText($"{scanDir}/testfile_root.txt", contents);
+
+            FileWatcher from = this.Setup("Changed", true, scanDir, "", "", subDirectories);
             from.OnAction += delegate (object sender, Routable e)
             {
                 if (e.Headers["Method"] == "Scanned")
@@ -100,7 +105,7 @@ namespace Kyameru.Component.File.Tests
             from.Setup();
             from.Start();
             resetEvent.WaitOne(TimeSpan.FromSeconds(5));
-            Assert.AreEqual(20, count);
+            Assert.AreEqual(expected, count);
         }
 
         [Test]
@@ -145,13 +150,14 @@ namespace Kyameru.Component.File.Tests
             bool initialScan = false,
             string target = "test/",
             string ignore = "",
-            string ignoreStrings = "")
+            string ignoreStrings = "",
+            string subDirectories = "true")
         {
             Dictionary<string, string> headers = new Dictionary<string, string>()
             {
                 { "Target",target },
                 { "Notifications", notification },
-                { "SubDirectories", "true" },
+                { "SubDirectories", subDirectories },
                 { "InitialScan", initialScan.ToString() },
                 { "Ignore", ignore },
                 { "IgnoreStrings", ignoreStrings }
