@@ -56,7 +56,24 @@ namespace Kyameru.Component.File.Tests
             System.IO.File.WriteAllText(toFile, "data");
             this.fileUtils.Move(toFile, destination, overwrite);
             Assert.AreEqual("data", System.IO.File.ReadAllText(destination));
+            Assert.IsFalse(System.IO.File.Exists(this.toFile));
+        }
 
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void CopyFileOverwrites(bool overwrite)
+        {
+            string destination = $"{this.fileLocation}/to/dest.txt";
+            Directory.CreateDirectory($"{this.fileLocation}/to");
+            if(overwrite)
+            {
+                System.IO.File.WriteAllText(destination, "destinationfile");
+            }
+            System.IO.File.WriteAllText(toFile, "data");
+            this.fileUtils.CopyFile(toFile, destination, overwrite);
+            Assert.AreEqual("data", System.IO.File.ReadAllText(destination));
+            Assert.IsTrue(System.IO.File.Exists(this.toFile));
         }
 
         [SetUp]
