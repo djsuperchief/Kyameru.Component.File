@@ -244,7 +244,7 @@ namespace Kyameru.Component.File
                     headers.Add("&DateCreated", info.CreationTimeUtc.ToLongDateString());
                     headers.Add("Readonly", info.IsReadOnly.ToString());
                     headers.Add("Method", method);
-                    headers.Add("DataType", "byte");
+                    headers.Add("DataType", "Byte");
                     Routable dataItem = new Routable(headers, System.IO.File.ReadAllBytes(sourceFile));
                     this.OnAction?.Invoke(this, dataItem);
                 }

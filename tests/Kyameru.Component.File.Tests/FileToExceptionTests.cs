@@ -29,11 +29,11 @@ namespace Kyameru.Component.File.Tests
         [SetUp]
         public void Init()
         {
-            this.fileUtils.Setup(x => x.CopyFile(It.IsAny<string>(), It.IsAny<string>())).Throws(new NotImplementedException());
+            this.fileUtils.Setup(x => x.CopyFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).Throws(new NotImplementedException());
             this.fileUtils.Setup(x => x.CreateDirectory(It.IsAny<string>())).Throws(new NotImplementedException());
             this.fileUtils.Setup(x => x.Delete(It.IsAny<string>())).Throws(new NotImplementedException());
-            this.fileUtils.Setup(x => x.Move(It.IsAny<string>(), It.IsAny<string>())).Throws(new NotImplementedException());
-            this.fileUtils.Setup(x => x.WriteAllBytes(It.IsAny<string>(), It.IsAny<byte[]>())).Throws(new NotImplementedException());
+            this.fileUtils.Setup(x => x.Move(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).Throws(new NotImplementedException());
+            this.fileUtils.Setup(x => x.WriteAllBytes(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<bool>())).Throws(new NotImplementedException());
         }
 
         private Routable GetRoutable()

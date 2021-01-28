@@ -31,6 +31,11 @@ namespace Kyameru.Component.File
         private readonly IFileUtils fileUtils;
 
         /// <summary>
+        /// Value indicating whether the overwrite facility should be used.
+        /// </summary>
+        private readonly bool overwrite;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="FileTo"/> class.
         /// </summary>
         /// <param name="incomingHeaders">Incoming headers.</param>
@@ -39,6 +44,7 @@ namespace Kyameru.Component.File
             this.SetupInternalActions();
             this.headers = incomingHeaders.ToToConfig();
             this.fileUtils = fileUtils;
+            this.overwrite = bool.Parse(this.headers["Overwrite"]);
         }
 
         /// <summary>
@@ -87,7 +93,15 @@ namespace Kyameru.Component.File
             try
             {
                 this.EnsureDestinationExists();
-                this.fileUtils.WriteAllBytes(this.GetDestination(item.Headers["SourceFile"]), (byte[])item.Body);
+                if(item.Headers["DataType"] == "String")
+                {
+                    this.fileUtils.WriteAllText(this.GetDestination(item.Headers["SourceFile"]), (string)item.Body, this.overwrite);
+                }
+                else
+                {
+                    this.fileUtils.WriteAllBytes(this.GetDestination(item.Headers["SourceFile"]), (byte[])item.Body, this.overwrite);
+                }
+                
                 this.DeleteFile(item);
             }
             catch (Exception ex)
@@ -107,7 +121,7 @@ namespace Kyameru.Component.File
             try
             {
                 this.EnsureDestinationExists();
-                this.fileUtils.Move(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]));
+                this.fileUtils.Move(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]), this.overwrite);
             }
             catch (Exception ex)
             {
@@ -137,7 +151,7 @@ namespace Kyameru.Component.File
             try
             {
                 this.EnsureDestinationExists();
-                this.fileUtils.CopyFile(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]));
+                this.fileUtils.CopyFile(item.Headers["FullSource"], this.GetDestination(item.Headers["SourceFile"]), this.overwrite);
             }
             catch (Exception ex)
             {

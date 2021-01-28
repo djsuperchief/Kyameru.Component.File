@@ -19,10 +19,11 @@ namespace Kyameru.Component.File.Tests
         }
 
         [Test]
-        [TestCase("Move")]
-        [TestCase("Copy")]
-        [TestCase("Write")]
-        public void CanDoAction(string action)
+        [TestCase("Move", "String")]
+        [TestCase("Copy", "String")]
+        [TestCase("Write", "String")]
+        [TestCase("Write", "Byte")]
+        public void CanDoAction(string action, string bodyType)
         {
             string randomFileName = $"{Guid.NewGuid().ToString("N")}.txt";
             FileTo fileTo = this.Setup(action, randomFileName);
@@ -32,7 +33,14 @@ namespace Kyameru.Component.File.Tests
                 { "FullSource", $"test/{randomFileName}" },
                 { "SourceFile", randomFileName }
             };
-            fileTo.Process(new Core.Entities.Routable(routableHeaders, System.Text.Encoding.UTF8.GetBytes("test file")));
+            Core.Entities.Routable routable = new Core.Entities.Routable(routableHeaders, System.Text.Encoding.UTF8.GetBytes("test file"));
+            routable.SetBody<Byte[]>(System.Text.Encoding.UTF8.GetBytes("Test"));
+            if(bodyType == "String")
+            {
+                routable.SetBody<string>("Test");
+            }
+
+            fileTo.Process(routable);
             Assert.IsTrue(System.IO.File.Exists($"{this.fileLocation}/target/{randomFileName}"));
         }
 
