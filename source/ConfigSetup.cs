@@ -12,6 +12,15 @@ namespace Kyameru.Component.File
         /// </summary>
         private static string[] fromHeaders = new string[] { "Target", "Notifications", "Filter", "SubDirectories", "InitialScan", "Ignore", "IgnoreStrings" };
 
+        private static Dictionary<string, string> optionalFromHeaders = new Dictionary<string, string>()
+        {
+            { "Filter", "*.*" },
+            { "SubDirectories", "false" },
+            { "InitialScan", "false" },
+            { "Ignore", "" },
+            { "IgnoreStrings", "" }
+        };
+
         /// <summary>
         /// Valid to headers
         /// </summary>
@@ -33,27 +42,20 @@ namespace Kyameru.Component.File
                 }
             }
 
-            if (!response.ContainsKey("Filter"))
-            {
-                response.Add("Filter", "*.*");
-            }
-
-            if (!response.ContainsKey("InitialScan"))
-            {
-                response.Add("InitialScan", "false");
-            }
-
-            if (!response.ContainsKey("Ignore"))
-            {
-                response.Add("Ignore", "");
-            }
-
-            if (!response.ContainsKey("IgnoreStrings"))
-            {
-                response.Add("IgnoreStrings", "");
-            }
+            SetOptionalFromHeaders(response);
 
             return response;
+        }
+
+        private static void SetOptionalFromHeaders(Dictionary<string, string> response)
+        {
+            foreach(string key in optionalFromHeaders.Keys)
+            {
+                if(!response.ContainsKey(key))
+                {
+                    response.Add(key, optionalFromHeaders[key]);
+                }
+            }
         }
 
         /// <summary>
