@@ -120,10 +120,8 @@ namespace Kyameru.Component.File
         /// </summary>
         private void SetupSubDirectories()
         {
-            if (this.config.ContainsKey("SubDirectories") && bool.Parse(this.config["SubDirectories"]))
-            {
-                this.fsw.IncludeSubdirectories = bool.Parse(this.config["SubDirectories"]);
-            }
+            // Optional but always supplied.
+            this.fsw.IncludeSubdirectories = bool.Parse(this.config["SubDirectories"]);
         }
 
         /// <summary>
